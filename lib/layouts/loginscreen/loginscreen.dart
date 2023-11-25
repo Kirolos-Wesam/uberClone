@@ -21,7 +21,7 @@ class LoginScreen extends StatelessWidget {
               children: [
                 Container(
                   width: double.infinity,
-                  height: 400,
+                  height: 350,
                   padding:
                       const EdgeInsetsDirectional.symmetric(vertical: 10),
                   decoration: BoxDecoration(
@@ -74,7 +74,7 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(
                   height: 20,
                 ),
-                cubit.pages[1]
+                cubit.pages[cubit.index]
               ],
             ),
           ),

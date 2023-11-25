@@ -4,12 +4,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_country_code_picker/fl_country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:uberapp/modules/loginpage/cubit/login_page_state.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:uberapp/modules/guestpage/cubit/guest_page_state.dart';
 
-class LoginPageCubit extends Cubit<LoginPageState> {
-  LoginPageCubit() : super(LoginPageInitial());
+class GuestPageCubit extends Cubit<GuestPageState> {
+  GuestPageCubit() : super(GuestPageInitial());
 
-  static LoginPageCubit get(context) => BlocProvider.of(context);
+  static GuestPageCubit get(context) => BlocProvider.of(context);
 
 
   TextEditingController phoneNumberController = TextEditingController();
@@ -22,6 +23,26 @@ class LoginPageCubit extends Cubit<LoginPageState> {
       emit(CountryPickerState());
     }            
   }
+
+   signInWithGoogle() async {
+  // Trigger the authentication flow
+  final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+  // Obtain the auth details from the request
+  final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+  // Create a new credential
+  final credential = GoogleAuthProvider.credential(
+    accessToken: googleAuth?.accessToken,
+    idToken: googleAuth?.idToken,
+  );
+
+  // Once signed in, return the UserCredential
+  return await FirebaseAuth.instance.signInWithCredential(credential).then((value) {
+    print(value.user!.uid);
+  });
+}
+
 
 
   String userUid = '';
@@ -37,7 +58,7 @@ class LoginPageCubit extends Cubit<LoginPageState> {
         phoneNumber: phone,
         timeout: const Duration(seconds: 60),
         verificationCompleted: (PhoneAuthCredential credential) async {
-          emit(VerificationSendSuccessState());
+          
           credentials = credential;
           await FirebaseAuth.instance.signInWithCredential(credential);
         },
@@ -50,6 +71,7 @@ class LoginPageCubit extends Cubit<LoginPageState> {
         },
         codeSent: (String verificationId, int? resendToken) async {
           log('Code sent');
+          emit(VerificationSendSuccessState());
           verId = verificationId;
           resendTokenId = resendToken;
         },
